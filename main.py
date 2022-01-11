@@ -63,8 +63,25 @@ Available Options:
         for beverage in MENU:
             cost = "{:.2f}".format(MENU[beverage]["cost"])
             print(f"{item_number}. {beverage.title()} - ${cost}")
-        beverage_choice = input("What would you like to order (1/2/3)? ")
+            item_number +=1
+        beverage_choice = int(input("What would you like to order (1/2/3)? ").lower())
+        if beverage_choice == 1:
+            beverage_choice = "espresso"
+        elif beverage_choice == 2:
+            beverage_choice = "latte"
+        elif beverage_choice == 3:
+            beverage_choice = "cappuccino"
+        else:
+            print("Sorry, that is not a valid item!")
+            redirect()
         # check if machine has enough resources to make drink
+        selected_beverage = MENU[beverage_choice]
+        beverage_ingredients = selected_beverage["ingredients"]
+        sufficient_resources = True
+        for ingredient in beverage_ingredients:
+            if beverage_ingredients[ingredient] > resources[ingredient]:
+                sufficient_resources = False
+                print("Sorry, machine does not have sufficient resources to make that beverage.")
         
         # prompt for money
 
