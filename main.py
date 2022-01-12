@@ -36,6 +36,7 @@ resources = {
     "water": 300,
     "milk": 200,
     "coffee": 100,
+    "money": 0
 }
 
 
@@ -66,8 +67,15 @@ Available Options:
     if(machine_action == '1'):
         return order_beverage()
     elif(machine_action == '2'):
+        clearConsole()
         for resource in resources:
-            print(f"{resource.title()}: {resources[resource]}")
+            if resource == "water" or resource == "milk":
+                print(f"{resource.title()}: {resources[resource]}ml")
+            elif resource == "coffee":
+                print(f"{resource.title()}: {resources[resource]}g")
+            else:
+                print(f"{resource.title()}: ${resources[resource]}")
+
         redirect("main menu")
     elif(machine_action == '3'):
         print("Bye-bye! (^^)b ")
@@ -78,6 +86,7 @@ Available Options:
     
 
 def order_beverage():
+    clearConsole()
     print("Menu:")
     item_number = 1
     for beverage in MENU:
@@ -92,7 +101,7 @@ def order_beverage():
     elif beverage_choice == 3:
         beverage_choice = "cappuccino"
     else:
-        print("\nSorry, that is not a valid item!")
+        print("Sorry, that is not a valid item!")
         redirect("beverage menu")
     # check if machine has enough resources to make drink
     selected_beverage = MENU[beverage_choice]
@@ -105,19 +114,38 @@ def order_beverage():
             redirect("main menu")
     
     # prompt for money
-    beverage_cost = selected_beverage["cost"]
-    # update resources 
-    while beverage_cost > 0:
-        
-    # return change
+    remaining_cost = selected_beverage["cost"]*100
+    while remaining_cost > 0:
+        remaining_cost_formatted = "{:.2f}".format(remaining_cost/100)
+        print(f"\nPlease pay ${remaining_cost_formatted} to receive your {beverage_choice}.\n")
+        remaining_cost -= convert_change()
+    #update resources
+    for ingredient in beverage_ingredients:
+        resources[ingredient] -= beverage_ingredients[ingredient]
+    resources["money"] += selected_beverage["cost"]
+    print(f"\nHere is your {beverage_choice}. Please enjoy it while its hot! (^^)b")
+     # return change
+    if remaining_cost < 0:
+        remaining_cost = "{:.2f}".format(remaining_cost / 100 * -1)
+        print(f"Please do not forget to take your change of ${remaining_cost}.")
+    redirect("main menu")
 
-def convert_change(cost):
-    quarters = input("Enter number of quarters: ")
-    dimes = input("Enter number of dimes: ")
-    nickels = input("Enter number of nickels: ")
-    pennies = input("Enter number of pennies: ")
-
-    return (quarters * 25 + dimes * 10 + nickels * 5 + pennies)
+def convert_change():
+    print("Enter your change as requested below.\n")
+    coins = {
+        "quarters": {"amount": 0, "value": 25},
+        "dimes": {"amount": 0, "value": 10},
+        "nickels": {"amount": 0, "value": 5},
+        "pennies":{"amount": 0, "value": 1}
+    }
+    amount_payed = 0
+    for coin in coins:
+        try:
+            coins[coin]["amount"] = int(input(f"Enter number of {coin}: "))
+        except ValueError:
+            coins[coin]["amount"] = 0
+        amount_payed += coins[coin]["amount"] * coins[coin]["value"]
+    return amount_payed
 
 
 clearConsole()
